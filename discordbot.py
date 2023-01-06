@@ -21,6 +21,15 @@ def searchLike(name,guildid):
     result = con.execute("SELECT * FROM chara where name like ? and guildID=?;",("%"+name+"%",guildid))
     return result
 
+def searchDelete(name,guildid,authorid):
+    con=sqlite3.connect("charaDB.db")
+    try:
+       con.execute("DELETE FROM chara where name=? and guildID=? and autorID=? ;",(name,guildid,authorid))
+    except sqlite3.IntegrityError:
+        con.rollback()
+    finally:
+        con.commit()
+
 @client.event
 async def on_ready():
     print('Logged in as')
@@ -30,14 +39,20 @@ async def on_ready():
 
 @client.event
 async def on_message(message):
-    if message.content.startswith("/check "):
+    if message.content.startswith("/del "):
+        msg=message.content.split(" ")
+        searchDelete(msg[1],message.guild.id,message.author.id)
+    if message.content.startswith("/del　"):
+        msg=message.content.split("　")
+        searchDelete(msg[1],message.guild.id,message.author.id)
+    if message.content.startswith("/ser "):
         msg=message.content.split(" ")
         print(msg[1])
         result=searchLike(msg[1],message.guild.id)
         if result!=0:
             for row in result:
                 await message.channel.send(row[1])
-    if message.content.startswith("/check　"):
+    if message.content.startswith("/ser　"):
         msg=message.content.split("　")
         print(msg[1])
         result=searchLike(msg[1],message.guild.id)
@@ -65,7 +80,7 @@ async def on_message(message):
         con=sqlite3.connect("charaDB.db")
         filepass="img/"+date.strftime("%Y%m%d%H%M%S") + ".png"
         try:
-            con.execute("INSERT INTO chara VALUES (?, ?, ?, ?)",(date.strftime("%Y%m%d%H%M%S"),msg[1],filepass,message.guild.id))
+            con.execute("INSERT INTO chara VALUES (?, ?, ?, ? ,?)",(date.strftime("%Y%m%d%H%M%S"),msg[1],filepass,message.guild.id,message.author.id))
         except sqlite3.IntegrityError:
             con.rollback()
         finally:
@@ -77,7 +92,7 @@ async def on_message(message):
         con=sqlite3.connect("charaDB.db")
         filepass="img/"+date.strftime("%Y%m%d%H%M%S") + ".png"
         try:
-            con.execute("INSERT INTO chara VALUES (?, ?, ?, ?)",(date.strftime("%Y%m%d%H%M%S"),msg[1],filepass,message.guild.id))
+            con.execute("INSERT INTO chara VALUES (?, ?, ?, ? ,?)",(date.strftime("%Y%m%d%H%M%S"),msg[1],filepass,message.guild.id,message.author.id))
         except sqlite3.IntegrityError:
             con.rollback()
         finally:
