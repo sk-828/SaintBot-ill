@@ -1,16 +1,8 @@
-import math
 import discord
-from discord.ext import tasks
-import random
-import re
 import os
 from dotenv import load_dotenv
 import sqlite3
-import requests
-import shutil
-import urllib.request
 import datetime
-import subprocess
 from func import download_image_class
 
 intents = discord.Intents.default()
@@ -24,7 +16,10 @@ def search(name,guildid):
     for row in result:
         return row
     return 0
-
+def searchLike(name,guildid):
+    con=sqlite3.connect("charaDB.db")
+    result = con.execute("SELECT * FROM chara where name like ? and guildID=?;",("%"+name+"%",guildid))
+    return result
 
 @client.event
 async def on_ready():
@@ -35,6 +30,20 @@ async def on_ready():
 
 @client.event
 async def on_message(message):
+    if message.content.startswith("/check "):
+        msg=message.content.split(" ")
+        print(msg[1])
+        result=searchLike(msg[1],message.guild.id)
+        if result!=0:
+            for row in result:
+                await message.channel.send(row[1])
+    if message.content.startswith("/check　"):
+        msg=message.content.split("　")
+        print(msg[1])
+        result=searchLike(msg[1],message.guild.id)
+        if result!=0:
+            for row in result:
+                await message.channel.send(row[1])
     if message.content.startswith("/test"):
         print(message.guild.id)
     if message.content.startswith("/ill "):
